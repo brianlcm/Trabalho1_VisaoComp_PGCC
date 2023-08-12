@@ -1,43 +1,29 @@
-import numpy as np
 import cv2
+import numpy as np
 
-# Read the query image as query_img
-# and train image This query image
-# is what you need to find in train image
-# Save it in the same directory
-# with the name image.jpg
-query_img = cv2.imread('query.jpg')
-train_img = cv2.imread('train.jpg')
+def returna_mapaPontos(img1, img2):
 
-# Convert it to grayscale
-query_img_bw = cv2.cvtColor(query_img,cv2.COLOR_BGR2GRAY)
-train_img_bw = cv2.cvtColor(train_img, cv2.COLOR_BGR2GRAY)
+    orb = cv2.ORB_create()
 
-# Initialize the ORB detector algorithm
-orb = cv2.ORB_create()
+    img1_keypoints, img1_descriptors = orb.detectAndCompute(img1, None)
+    img2_keypoints, img2_descriptors = orb.detectAndCompute(img2, None)
 
-# Now detect the keypoints and compute
-# the descriptors for the query image
-# and train image
-queryKeypoints, queryDescriptors = orb.detectAndCompute(query_img_bw,None)
-trainKeypoints, trainDescriptors = orb.detectAndCompute(train_img_bw,None)
+    cv2.imwrite('imagens/keypoints-1.png',
+                    cv2.drawKeypoints(img1, img1_keypoints, img1))
+    cv2.imwrite('imagens/keypoints-2.png',
+                    cv2.drawKeypoints(img2, img2_keypoints, img2))
 
-# Initialize the Matcher for matching
-# the keypoints and then match the
-# keypoints
-matcher = cv2.BFMatcher()
-matches = matcher.match(queryDescriptors,trainDescriptors)
+    matcher = cv2.BFMatcher(cv2.NORM_L2, True)
+    matches = matcher.match(img1_descriptors,img2_descriptors)
 
-# draw the matches to the final image
-# containing both the images the drawMatches()
-# function takes both images and keypoints
-# and outputs the matched query image with
-# its train image
-final_img = cv2.drawMatches(query_img, queryKeypoints,
-train_img, trainKeypoints, matches[:20],None)
+    point_map = np.array([
+            [img1_keypoints[match.queryIdx].pt[0],
+            img1_keypoints[match.queryIdx].pt[1],
+            img2_keypoints[match.trainIdx].pt[0],
+            img2_keypoints[match.trainIdx].pt[1]] for match in matches
+        ])
 
-final_img = cv2.resize(final_img, (1000,650))
+    cv2.imwrite('imagens/matches.png', cv2.drawMatches(img1, img1_keypoints,
+    img2, img2_keypoints, point_map))
 
-# Show the final image
-cv2.imshow("Matches", final_img)
-cv2.waitKey(3000)
+    return point_map
