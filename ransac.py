@@ -33,7 +33,7 @@ def dist(pair, H):
 
     return np.linalg.norm(np.transpose(p2) - p2_estimate)
 
-def RANSAC(mapaPontos):
+def runRANSAC(mapaPontos):
     N = 10000
     contador_amostras = 0
     bestInliers = set()
