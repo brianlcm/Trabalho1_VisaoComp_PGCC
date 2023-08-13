@@ -1,8 +1,8 @@
 import numpy as np
 
-def calculaHomografia(pares):
+def HomographyGenerator(pairs):
     A = []
-    for x1, y1, x2, y2 in pares:
+    for x1, y1, x2, y2 in pairs:
         A.append([x1, y1, 1, 0, 0, 0, -x2 * x1, -x2 * y1, -x2])
         A.append([0, 0, 0, x1, y1, 1, -y2 * x1, -y2 * y1, -y2])
     A = np.array(A)
@@ -18,10 +18,11 @@ def calculaHomografia(pares):
     H = (1 / H.item(8)) * H
     return H
 
-def atualizaN(epslon):
-    p = 0.99
-    novoN = np.log(1-p)/np.log(1-(1-epslon)**4)
-    return novoN
+def updateN(epslon, p):
+
+    N = np.log(1-p)/np.log(1-(1-epslon)**4)
+
+    return N
 
 def dist(pair, H):
     # points in homogeneous coordinates
@@ -33,27 +34,31 @@ def dist(pair, H):
 
     return np.linalg.norm(np.transpose(p2) - p2_estimate)
 
-def runRANSAC(mapaPontos):
-    N = 10000
-    contador_amostras = 0
+def runRANSAC(pointsMap):
+    # Define os parametros do algoritmo do RANSAC
+    N = 10000 # Numero de amostragens N
+    p = 0.99
+    counterSamples = 0
     bestInliers = set()
     homography = None
-    epslon = 1
-    novo_epslon = None
+    epslon = 1.0
+    epslonUpdate = None
     
-    while (N > contador_amostras):
+    # Adaptative RANSAC
+    while (N > counterSamples):
 
-        pares = [mapaPontos[i] for i in np.random.choice(len(mapaPontos), 4)]
+        # Escolhe randomicamente 4 correspondencias para estimar a solucao
+        pairs = [pointsMap[i] for i in np.random.choice(len(pointsMap), 4)]
 
-        H = calculaHomografia(pares)
+        H = HomographyGenerator(pairs)
         inliers = {(c[0], c[1], c[2], c[3])
-                   for c in mapaPontos if dist(c, H) < 500}
+                   for c in pointsMap if dist(c, H) < 500}
 
-        novo_epslon = 1 - (len(inliers)/len(mapaPontos))
+        epslonUpdate = 1 - (len(inliers)/len(pointsMap))
         
-        if (novo_epslon < epslon):
-            epslon = novo_epslon
-            novoN = atualizaN(epslon)
+        if (epslonUpdate < epslon):
+            epslon = epslonUpdate
+            novoN = updateN(epslon, p)
 
         if len(inliers) > len(bestInliers):
             bestInliers = inliers
@@ -62,7 +67,7 @@ def runRANSAC(mapaPontos):
         if novoN < N:
             break
         N = novoN
-        contador_amostras+=1
+        counterSamples+=1
         
     return homography, bestInliers
 

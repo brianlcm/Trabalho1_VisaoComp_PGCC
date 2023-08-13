@@ -3,7 +3,7 @@ import numpy as np
 import os
 import util
 
-def pointMaps(img1, img2):
+def pointsMap(img1, img2):
 
     # Chama a funcao para criar objeto SIFT a partir do OpenCV
     sift = cv2.SIFT_create()
@@ -33,5 +33,5 @@ def pointMaps(img1, img2):
     # Salva a imagens com todos os pontos de correspondencia
     matched_image = cv2.drawMatches(img1, img1_keypoints, img2, img2_keypoints, matches, None, flags=2)
     cv2.imwrite('images\\Matches.png', matched_image)
-    
+
     return point_map
