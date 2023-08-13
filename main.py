@@ -20,9 +20,8 @@ def main():
     util.draw_lines(inliers, imgInput1, imgInput2,
                                   line_color=[0, 255, 0], pt_color=[0, 0, 0])
 
-    print(homography)
-
-    #homography = ransac.HomographyGenerator(inliers)
+    # Estima H utilizando os inliers da melhor solucao candidata
+    homography = ransac.HomographyGenerator(inliers)
     
 if __name__ == '__main__':
     main()
