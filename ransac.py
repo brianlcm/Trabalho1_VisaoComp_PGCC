@@ -33,13 +33,14 @@ def dist(pair, H):
 
     return np.linalg.norm(np.transpose(p2) - p2_estimate)
 
-def ransac(mapaPontos):
+def RANSAC(mapaPontos):
     N = 10000
     contador_amostras = 0
     bestInliers = set()
     homography = None
-    epslon = None
-
+    epslon = 1
+    novo_epslon = None
+    
     while (N > contador_amostras):
 
         pares = [mapaPontos[i] for i in np.random.choice(len(mapaPontos), 4)]
@@ -48,7 +49,7 @@ def ransac(mapaPontos):
         inliers = {(c[0], c[1], c[2], c[3])
                    for c in mapaPontos if dist(c, H) < 500}
 
-        novo_epslon = 1 - (inliers/len(mapaPontos))
+        novo_epslon = 1 - (len(inliers)/len(mapaPontos))
         
         if (novo_epslon < epslon):
             epslon = novo_epslon
@@ -60,6 +61,7 @@ def ransac(mapaPontos):
 
         if novoN < N:
             break
+        N = novoN
         contador_amostras+=1
         
     return homography, bestInliers
