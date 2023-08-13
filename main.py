@@ -3,6 +3,7 @@
 import cv2
 import matching_images
 import ransac
+import util
 
 def main():
     # Faz a leitura do par de imagens a partir da pasta 'images'.
@@ -14,7 +15,14 @@ def main():
 
     # Chama a funcao do para computar a homografia a partir do RANSAC
     homography, inliers = ransac.runRANSAC(pointsMap)
-    homography = ransac.HomographyGenerator(inliers)
+
+    #cv2.imwrite('images\\matches_RANSAC.png', util.drawMatches(imgInput1, imgInput2, pointsMap, inliers))
+    util.draw_lines(inliers, imgInput1, imgInput2,
+                                  line_color=[0, 255, 0], pt_color=[0, 0, 0])
+
+    print(homography)
+
+    #homography = ransac.HomographyGenerator(inliers)
     
 if __name__ == '__main__':
     main()

@@ -1,16 +1,17 @@
 import cv2
 import numpy as np
-import os
-import util
 
 def pointsMap(img1, img2):
 
+    img1_gray = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
+    img2_gray = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
+
     # Chama a funcao para criar objeto SIFT a partir do OpenCV
-    sift = cv2.SIFT_create()
+    sift = cv2.ORB_create()
 
     # Detecta e computa os pontos de interesse e descritores em cada imagem
-    img1_keypoints, img1_descriptors = sift.detectAndCompute(img1, None)
-    img2_keypoints, img2_descriptors = sift.detectAndCompute(img2, None)
+    img1_keypoints, img1_descriptors = sift.detectAndCompute(img1_gray, None)
+    img2_keypoints, img2_descriptors = sift.detectAndCompute(img2_gray, None)
 
     # Salva as imagens com os pontos de interesse
     cv2.imwrite('images\\keypoints-1.png',
@@ -32,6 +33,6 @@ def pointsMap(img1, img2):
 
     # Salva a imagens com todos os pontos de correspondencia
     matched_image = cv2.drawMatches(img1, img1_keypoints, img2, img2_keypoints, matches, None, flags=2)
-    cv2.imwrite('images\\Matches.png', matched_image)
+    cv2.imwrite('images\\matches_BFMatcher.png', matched_image)
 
     return point_map
