@@ -25,7 +25,7 @@ def SIFT_descriptor(img1_gray, img2_gray):
 
     return img1_keypoints, img1_descriptors, img2_keypoints, img2_descriptors
 
-def run_matching_images(img1, img2):
+def run_matching_images(img1, img2, pair_imgs):
 
     # Converte as imagens para escala de cinza
     img1_gray = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
@@ -35,9 +35,9 @@ def run_matching_images(img1, img2):
     img1_keypoints, img1_descriptors, img2_keypoints, img2_descriptors = ORB_descriptor(img1_gray, img2_gray)
 
     # Salva as imagens com os pontos de interesse
-    cv2.imwrite('results\\keypoints-1.png',
+    cv2.imwrite('results\\pair_images_{}\\keypoints-img1.png'.format(pair_imgs),
                 cv2.drawKeypoints(img1, img1_keypoints, img1))
-    cv2.imwrite('results\\keypoints-2.png',
+    cv2.imwrite('results\\pair_images_{}\\keypoints-img2.png'.format(pair_imgs),
                 cv2.drawKeypoints(img2, img2_keypoints, img2))
     
     # Chama a funcao BFMatcher do OpenCV para forcar a matching entre as duas imagens 
@@ -54,6 +54,6 @@ def run_matching_images(img1, img2):
 
     # Salva a imagens com todos os pontos de correspondencia
     matched_image = cv2.drawMatches(img1, img1_keypoints, img2, img2_keypoints, matches, None, flags=2)
-    cv2.imwrite('results\\matches_BFMatcher.png', matched_image)
+    cv2.imwrite('results\\pair_images_{}\\matches_BFMatcher.png'.format(pair_imgs), matched_image)
 
     return pointsMap

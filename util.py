@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 # Function to draw lines to indicate correspondence
-def draw_inlines(inliers, img_1, img_2):
+def draw_inlines(inliers, img_1, img_2, pair_imgs):
 
         # Define alguns parametros para desenhar os inliers
         lineColor = [0, 255, 0] # A cor da linha foi definida como verde
@@ -35,4 +35,4 @@ def draw_inlines(inliers, img_1, img_2):
                      thickness=lineThickness)
 
         # Salva a imagem com as marcacoes
-        cv2.imwrite('results\\matches_RANSAC.png', imgStack)
+        cv2.imwrite('results\\pair_images_{}\\matches_RANSAC.png'.format(pair_imgs), imgStack)

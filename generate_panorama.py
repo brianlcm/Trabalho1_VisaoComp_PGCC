@@ -1,31 +1,31 @@
 import numpy as np
-from itertools import combinations, product
+from itertools import product
 
+# Funcao principal para a criacao da imagem panoramica
 def fit_transform_homography(homography, img1, img2):
 
-    rgb_left_image = img1
-    rgb_right_image = img2
-    print(type(rgb_left_image))
+    # Pega as dimensoes da imagem
+    image_width, image_height = len(img1[0]), len(img1)
 
-    image_width, image_height = len(rgb_left_image[0]), len(rgb_left_image)
-
-    # create new canvas
+    # create new canvas with zeros np function which returns a new array of given shape and type, filled with zeros
     warped_image = np.zeros((image_height, image_width * 2, 3), dtype=np.uint8)
 
     # loop through x and y of a new canvas twice the width of the original image
     for x, y in product(range(image_width * 2), range(image_height)):
 
+        # Calls the Compute the map point function
         mapped_point = compute_map_point(x, y, homography)
+        
         # if source point is in left image
         if x < image_width:
             # mapped point is within left image
-            if within(mapped_point, image_height, image_width):
+            if verify_point(mapped_point, image_height, image_width):
                 # Blend color value from left and interpolated value from right image
-                r, g, b = interpolation_pixel(mapped_point[0], mapped_point[1], rgb_right_image)
-                r_left, g_left, b_left = rgb_left_image[y][x]
+                r, g, b = interpolation_pixel(mapped_point[0], mapped_point[1], img2)
+                r_left, g_left, b_left = img1[y][x]
 
                 if r == -1:
-                    warped_image[y][x] = rgb_left_image[y][x]
+                    warped_image[y][x] = img1[y][x]
                     continue
 
                 threshold = 50
@@ -35,12 +35,12 @@ def fit_transform_homography(homography, img1, img2):
                     warped_image[y][x] = [(r + r_left) / 2, (g + g_left) / 2, (b + b_left) / 2]
 
             else:
-                warped_image[y][x] = rgb_left_image[y][x]  # take left pixel
+                warped_image[y][x] = img1[y][x]  # take left pixel
 
         else:  # source point is outside left image
-            if within(mapped_point, image_height, image_width):
+            if verify_point(mapped_point, image_height, image_width):
                 # take right pixel
-                r, g, b = interpolation_pixel(mapped_point[0], mapped_point[1], rgb_right_image)
+                r, g, b = interpolation_pixel(mapped_point[0], mapped_point[1], img2)
                 warped_image[y][x] = [r, g, b]
 
                 if r == -1:
@@ -94,20 +94,11 @@ def compute_bilinear_interpolation(location_x, location_y, pixel_array, image_wi
 
     return interpolated_value
 
-def within(point: np.ndarray, image_height: int, image_width: int) -> bool:
-    """
-    Check if a point is within the image
-    Parameters
-    ----------
-    point: np.ndarray
-        point to check
-    image_height: int
-        height of the image
-    image_width: int
-        width of the image
-    Returns
-    -------
-    bool
-        True if point is within the image, False otherwise
-    """
-    return 0 <= point[0] < image_width and 0 <= point[1] < image_height
+# Check if a point is within the image
+def verify_point(point, image_height, image_width):
+
+    # Returns true if the point is inside the image and returns otherwise
+    if (0 <= point[0] < image_width) and (0 <= point[1] < image_height):
+        return True
+    else:
+        return False
