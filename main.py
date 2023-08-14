@@ -8,7 +8,7 @@ import generate_panorama
 def main():
     
     # Define o par de imagens que sera usado para criar a imagem panoramica
-    pair_imgs = 'A' # A, B, C
+    pair_imgs = 'B' # A, B, C, D
 
     # Faz a leitura do par de imagens a partir da pasta 'images'.
     
