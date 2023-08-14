@@ -34,7 +34,7 @@ def dist(pair, H):
 
     return np.linalg.norm(np.transpose(p2) - p2_estimate)
 
-def runRANSAC(pointsMap):
+def run_RANSAC(pointsMap):
     # Define os parametros do algoritmo do RANSAC
     N = 1000 # Numero de amostragens N
     p = 0.99
