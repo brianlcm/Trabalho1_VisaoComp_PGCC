@@ -23,9 +23,9 @@ def main():
     # Estima H utilizando os inliers da melhor solucao candidata
     homography = ransac.HomographyGenerator(inliers)
     
-    img_final = generate_panorama.fit_transform_homography(homography, imgInput1, imgInput2)
+    panoramicImage = generate_panorama.fit_transform_homography(homography, imgInput1, imgInput2)
 
-    cv2.imwrite('results\\final-2.png',img_final)
+    cv2.imwrite('results\\final-2.png', panoramicImage)
     
 if __name__ == '__main__':
     main()

@@ -1,7 +1,10 @@
 import numpy as np
 
+# Funcao para calcular a homografia
 def HomographyGenerator(pairs):
     A = []
+    
+    # Monta uma matriz de acordo com as equacoes da homografia
     for x1, y1, x2, y2 in pairs:
         A.append([x1, y1, 1, 0, 0, 0, -x2 * x1, -x2 * y1, -x2])
         A.append([0, 0, 0, x1, y1, 1, -y2 * x1, -y2 * y1, -y2])
@@ -16,6 +19,7 @@ def HomographyGenerator(pairs):
 
     # Normalization
     H = (1 / H.item(8)) * H
+    
     return H
 
 # Funcao usada para atualizar o valor de N no loop do RANSAC
