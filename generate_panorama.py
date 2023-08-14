@@ -1,22 +1,22 @@
 import numpy as np
 from itertools import product
 
-# Funcao principal para a criacao da imagem panoramica
+# Main function for the creation of the panoramic image
 def fit_transform_homography(homography, img1, img2):
 
-    # Printa mensagem na tela
+    # Print message on screen
     print('Generating the panoramic image...')
     
-    # Pega as dimensoes da imagem
+    # Take the dimensions of the image
     img_width, img_height = len(img1[0]), len(img1)
 
-    # create new canvas with zeros np function which returns a new array of given shape and type, filled with zeros
+    # Create new canvas with zeros np function which returns a new array of given shape and type, filled with zeros
     warpedImg = np.zeros((img_height, img_width * 2, 3), dtype=np.uint8)
 
-    # loop through x and y of a new canvas twice the width of the original image
+    # Scroll x and y of a new canvas twice the width of the original image
     for x, y in product(range(img_width * 2), range(img_height)):
 
-        # Calls the compute the map point function
+        # Invokes the compute the map point function
         mapped_point = compute_map_point(x, y, homography)
         
         # If the origin point is in the image on the left
@@ -53,10 +53,10 @@ def fit_transform_homography(homography, img1, img2):
 
     return warpedImg
 
-# Computa o mapeamento dos pontos e retorna uma matrix
+# Computes the mapping of the points and returns a matrix
 def compute_map_point(x, y, homography):
     
-    # Calcula o produto dos arrays da homografia e dos pontos x e y
+    # Calculates the product of the homography arrays and the x and y points.
     p_mapped = np.dot(homography, np.array([x, y, 1]))
     matrix_mapPoint = (1 / p_mapped[-1]) * p_mapped
 

@@ -12,12 +12,12 @@ def draw_inlines(inliers, img_1, img_2, pair_imgs):
         circThickness = 2 # Thickness of circles
 
         # Shape function returns a tuple of the number of rows, columns, and channels
-        h, w, _ = img_1.shape 
+        _, w, _ = img_1.shape 
 
-        # Use numpy's hstack function to stack the arrays of the two images.
+        # Use numpy's hstack function to stack the arrays of the two images
         imgStack = np.hstack((img_1, img_2))
 
-        # Loop to go through the inliers and draw the circles and lines in the two images.
+        # Loop to go through the inliers and draw the circles and lines in the two images
         for x1, y1, x2, y2 in inliers:
             x1_d = int(round(x1))
             y1_d = int(round(y1))

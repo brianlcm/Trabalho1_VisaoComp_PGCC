@@ -5,6 +5,7 @@ import ransac
 import util
 import generate_panorama
 
+# Main project function
 def main():
     
     # Defines the image pair that will be used to create the panoramic image
