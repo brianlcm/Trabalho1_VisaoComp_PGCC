@@ -19,7 +19,7 @@ def HomographyGenerator(pairs):
 
     # Normalization
     H = (1 / H.item(8)) * H
-    
+
     return H
 
 # Funcao usada para atualizar o valor de N no loop do RANSAC
@@ -55,6 +55,8 @@ def run_RANSAC(pointsMap):
     homography = None
     epsilon = 1.0 # Epsilon inicial (pode ser alterado)
     epsilonUpdate = 0.0
+
+    print(f'Running RANSAC with {len(pointsMap)} points...')
     
     # Adaptative RANSAC
     while (N > counterSamplings):
@@ -88,6 +90,13 @@ def run_RANSAC(pointsMap):
         
         # Atualiza o numero de amostragens
         counterSamplings += 1
+
+        # Printa resultados
+        print(f'\x1b[2K\r└──> iteration {counterSamplings}/{N}', end='')
+        
+        print(f'\nNummber of matches: {len(pointsMap)}')
+        print(f'Number of inliers: {len(bestInliers)}')
+        print(f'Minimum inliers: {minInliers}')
         
     return homography, bestInliers
 

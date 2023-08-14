@@ -8,16 +8,15 @@ import generate_panorama
 def main():
     
     # Define o par de imagens que sera usado para criar a imagem panoramica
-    pair_imgs = 'B' # A, B, C, D
+    pair_imgs = 'A' # A, B, C, D
 
-    # Faz a leitura do par de imagens a partir da pasta 'images'.
-    
+    # Faz a leitura do par de imagens a partir da pasta 'images'
     imgInput1 = cv2.imread('input_images\\pair_images_{}\\input1.jpg'.format(pair_imgs))
     imgInput2 = cv2.imread('input_images\\pair_images_{}\\input2.jpg'.format(pair_imgs))
 
     # Chama a funcao para fazer a correspondencia entre as imagens e retornar o mapa de pontos
     pointsMap = matching_images.run_matching_images(imgInput1, imgInput2, pair_imgs)
-
+    
     # Chama a funcao do para computar a homografia a partir do RANSAC
     homography, inliers = ransac.run_RANSAC(pointsMap)
 

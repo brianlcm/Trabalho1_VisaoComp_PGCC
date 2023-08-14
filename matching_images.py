@@ -36,9 +36,9 @@ def run_matching_images(img1, img2, pair_imgs):
 
     # Salva as imagens com os pontos de interesse
     cv2.imwrite('results\\pair_images_{}\\keypoints_img1.png'.format(pair_imgs),
-                cv2.drawKeypoints(img1, img1_keypoints, img1))
+                cv2.drawKeypoints(img1_gray, img1_keypoints, img1_gray))
     cv2.imwrite('results\\pair_images_{}\\keypoints_img2.png'.format(pair_imgs),
-                cv2.drawKeypoints(img2, img2_keypoints, img2))
+                cv2.drawKeypoints(img2_gray, img2_keypoints, img2_gray))
     
     # Chama a funcao BFMatcher do OpenCV para forcar a matching entre as duas imagens 
     matcher = cv2.BFMatcher(cv2.NORM_L2, True)
