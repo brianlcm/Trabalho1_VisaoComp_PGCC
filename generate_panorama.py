@@ -19,11 +19,11 @@ def fit_transform_homography(homography, img1, img2):
         # Calls the compute the map point function
         mapped_point = compute_map_point(x, y, homography)
         
-        # if source point is in left image
+        # If the origin point is in the image on the left
         if x < img_width:
-            # mapped point is within left image
+            # If the mapped point is inside the image on the left
             if verify_point(mapped_point, img_height, img_width):
-                # Blend color value from left and interpolated value from right image
+                # Merge the color value on the left and the interpolated value of the image on the right
                 r, g, b = pixel_interpolation(mapped_point[0], mapped_point[1], img2)
                 r_left, g_left, b_left = img1[y][x]
 
@@ -36,13 +36,15 @@ def fit_transform_homography(homography, img1, img2):
                     warpedImg[y][x] = [r, g, b]
                 else:
                     warpedImg[y][x] = [(r + r_left) / 2, (g + g_left) / 2, (b + b_left) / 2]
-
+            
+            # Take left pixel
             else:
-                warpedImg[y][x] = img1[y][x]  # take left pixel
-
-        else:  # source point is outside left image
+                warpedImg[y][x] = img1[y][x]  
+        
+        # Then origin point is outside the left image
+        else:  
             if verify_point(mapped_point, img_height, img_width):
-                # take right pixel
+                # Take right pixel
                 r, g, b = pixel_interpolation(mapped_point[0], mapped_point[1], img2)
                 warpedImg[y][x] = [r, g, b]
 
@@ -70,22 +72,24 @@ def pixel_interpolation(x, y, rgb_sourceImg):
     return r, g, b
 
 # Computes bilinear interpolation
-def bilinear_interpolation(location_x, location_y, pixel_array, imgWidth, imgHeight):
+def bilinear_interpolation(loc_x, loc_y, pixels, imgWidth, imgHeight):
     
-    if location_x < 0 or location_y < 0 or location_x > imgWidth - 1 or location_y > imgHeight - 1:
+    # Check image boundaries
+    if loc_x < 0 or loc_y < 0 or loc_x > imgWidth - 1 or loc_y > imgHeight - 1:
         return -1
 
     interpolated_value = 0.0
 
-    x = int(location_x)
-    y = int(location_y)
-    a = location_x - x
-    b = location_y - y
+    x = int(loc_x)
+    y = int(loc_y)
+    a = loc_x - x
+    b = loc_y - y
 
-    interpolated_value += (1.0 - a) * (1.0 - b) * pixel_array[y][x]
-    interpolated_value += a * b * pixel_array[min(y + 1, imgHeight - 1)][min(x + 1, imgWidth - 1)]
-    interpolated_value += (1.0 - a) * b * pixel_array[min(y + 1, imgHeight - 1)][x]
-    interpolated_value += a * (1.0 - b) * pixel_array[y][min(x + 1, imgWidth - 1)]
+    # Calculates the interpolation value
+    interpolated_value += (1.0 - a) * (1.0 - b) * pixels[y][x]
+    interpolated_value += a * b * pixels[min(y + 1, imgHeight - 1)][min(x + 1, imgWidth - 1)]
+    interpolated_value += (1.0 - a) * b * pixels[min(y + 1, imgHeight - 1)][x]
+    interpolated_value += a * (1.0 - b) * pixels[y][min(x + 1, imgWidth - 1)]
 
     return interpolated_value
 
