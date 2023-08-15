@@ -24,9 +24,9 @@ def HomographyGenerator(pairs):
     return H
 
 # Function used to update the value of N in the RANSAC loop
-def updateN(epslon, p):
+def updateN(epsilon, p):
 
-    N = np.log(1-p)/np.log(1-(1-epslon)**4)
+    N = np.log(1-p)/np.log(1-(1-epsilon)**4)
 
     return round(N)
 
