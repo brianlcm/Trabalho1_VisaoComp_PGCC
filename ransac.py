@@ -1,5 +1,7 @@
 import numpy as np
 
+projectedError = []
+
 # Function to calculate homography
 def HomographyGenerator(pairs, T1, T2):
     
@@ -18,10 +20,8 @@ def HomographyGenerator(pairs, T1, T2):
     # of (A^T)A with the smalles eigenvalue. Reshape into 3x3 matrix.
     H = np.reshape(V[-1], (3, 3))
 
+    # Denormalizes the computed homography
     H = desnormalizePoints(H, T1, T2)
-
-    # Normalizes the points
-    #H = (1 / H.item(8)) * H
 
     return H
 
@@ -34,23 +34,26 @@ def normalizePoints(pointsMap):
     # Calculates the average of the set
     mean = np.mean(pointsMap, 0)
 
-    # 
+    # Using the formula presented by Hartley and Zisserman to define S
     s = np.linalg.norm((pointsMap-mean), axis=1).sum() / (pointsMapSize * np.sqrt(2))
 
-    # Compute a similarity transformation T, moves original points to
-    # new set of points, such that the new centroid is the origin,
-    # and the average distance from origin is square root of 2
+    # Compute a similarity transformation T
     T = np.array([[s, 0, mean[0]],
                   [0, s, mean[1]],
                   [0, 0, 1]])
+    
+    # Compute the inverse of a matrix T
     T = np.linalg.inv(T)
+
     pointsMap = np.dot(T, np.concatenate((pointsMap.T, np.ones((1, pointsMap.shape[0])))))
+
     pointsMap = pointsMap[0:2].T
 
     return pointsMap, T
 
+# Function to denormalize homography back
 def desnormalizePoints(HNormalized, T1, T2):
-    # Denormalization: denormalize the homography back
+
     H = np.dot(np.dot(np.linalg.pinv(T2), HNormalized), T1)
     H = H/H[-1, -1]
     return H
@@ -74,7 +77,11 @@ def dist(pair, H):
     p2_estimate = (1 / p2_estimate[2]) * p2_estimate
 
     # Returns the norm of the vector and uses numpy's transpose function to calculate an array with transposed axes
-    return np.linalg.norm(np.transpose(p2) - p2_estimate)
+    dist = np.linalg.norm(np.transpose(p2) - p2_estimate)
+
+    #projectedError.append(dist)
+
+    return dist
 
 # Main function that executes RANSAC
 def run_RANSAC(pointsMapImg1, pointsMapImg2):
@@ -88,19 +95,22 @@ def run_RANSAC(pointsMapImg1, pointsMapImg2):
     homography = None
     epsilon = 1.0 # Initial epsilon (can be changed)
     epsilonUpdate = 0.0
+    projectedError = 0
 
     print(f'Running RANSAC...')
 
+    # Concatenates the point map arrays of each image
     TotalPointsMap = np.concatenate([pointsMapImg1,pointsMapImg2], axis=1)
 
     # Normalizes the points of each image
     img1Normalized, T1 = normalizePoints(pointsMapImg1)
     img2Normalized, T2 = normalizePoints(pointsMapImg2)
 
+    # Concatenates the normalized point map arrays of each image
     TotalPointsMapNorm = np.concatenate([img1Normalized,img2Normalized], axis=1)
-    
+
     # Adaptative RANSAC
-    while (counterSamplings < 150):
+    while (counterSamplings < N):
 
         # Randomly choose 4 matches to estimate the solution
         pairs = [TotalPointsMapNorm[i] for i in np.random.choice(len(TotalPointsMapNorm), 4)]
@@ -133,13 +143,18 @@ def run_RANSAC(pointsMapImg1, pointsMapImg2):
         counterSamplings += 1
         
         # Print results
-        print(f'\x1b[2K\r└──> iteration {counterSamplings}/{N}', end='')
-        
-        print(f'\nNummber of matches: {len(TotalPointsMap)}')
+        print(f'\x1b[2K\r└──> iteration {counterSamplings}/{N}')
         print(f'Number of inliers: {len(bestInliers)}')
         print(f'Minimum inliers: {minInliers}')
         
-    
+    print(f'\nTotal number of matches: {len(TotalPointsMap)}')
+    print(f'Number of inliers: {len(bestInliers)}')
+    print(f'Proportion of inliers: {round((len(bestInliers)/len(TotalPointsMap))*100)}%')
+    outliers = len(TotalPointsMap) - len(bestInliers)
+    print(f'Proportion of outliers: {round((outliers/len(TotalPointsMap))*100)}%')
+    #print(f'Cumulative error: {np.sum(projectedError)}')
+    #print(f'Mean error: {np.mean(projectedError)}')
+
     return homography, bestInliers
 
 

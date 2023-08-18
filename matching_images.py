@@ -34,7 +34,7 @@ def run_matching_images(img1, img2, pair_imgs):
     img2_gray = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
 
     # Invokes the function to detect and compute the interest points and descriptors in each image (ORB or SIFT)
-    img1_keypoints, img1_descriptors, img2_keypoints, img2_descriptors = SIFT_descriptor(img1_gray, img2_gray)
+    img1_keypoints, img1_descriptors, img2_keypoints, img2_descriptors = ORB_descriptor(img1_gray, img2_gray)
 
     # Save images with points of interest
     cv2.imwrite('results\\pair_images_{}\\keypoints_img1.png'.format(pair_imgs),

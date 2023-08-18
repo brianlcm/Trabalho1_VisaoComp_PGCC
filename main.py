@@ -10,7 +10,7 @@ import generate_panorama
 def main():
     
     # Defines the image pair that will be used to create the panoramic image
-    pair_imgs = 'B' # A, B, C, D
+    pair_imgs = 'A' # A, B, C, D
 
     # Reads the image pair from the 'input_images' folder
     imgInput1 = cv2.imread('input_images\\pair_images_{}\\input1.jpg'.format(pair_imgs))
