@@ -34,7 +34,7 @@ def run_matching_images(img1, img2, pair_imgs):
     img2_gray = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
 
     # Invokes the function to detect and compute the interest points and descriptors in each image (ORB or SIFT)
-    img1_keypoints, img1_descriptors, img2_keypoints, img2_descriptors = ORB_descriptor(img1_gray, img2_gray)
+    img1_keypoints, img1_descriptors, img2_keypoints, img2_descriptors = SIFT_descriptor(img1_gray, img2_gray)
 
     # Save images with points of interest
     cv2.imwrite('results\\pair_images_{}\\keypoints_img1.png'.format(pair_imgs),
@@ -47,15 +47,18 @@ def run_matching_images(img1, img2, pair_imgs):
     matches = matcher.match(img1_descriptors,img2_descriptors)
 
     # Creates array with the mapping of the correspondence points found between the two images
-    pointsMap = np.array([
+    pointsMapImg1  = np.array([
             [img1_keypoints[match.queryIdx].pt[0],
-            img1_keypoints[match.queryIdx].pt[1],
-            img2_keypoints[match.trainIdx].pt[0],
+            img1_keypoints[match.queryIdx].pt[1]] for match in matches
+        ])
+    
+    pointsMapImg2  = np.array([
+            [img2_keypoints[match.trainIdx].pt[0],
             img2_keypoints[match.trainIdx].pt[1]] for match in matches
         ])
-
+    
     # Saves images with all matching points
     matched_image = cv2.drawMatches(img1, img1_keypoints, img2, img2_keypoints, matches, None, flags=2)
     cv2.imwrite('results\\pair_images_{}\\matches_BFMatcher.png'.format(pair_imgs), matched_image)
 
-    return pointsMap
+    return pointsMapImg1, pointsMapImg2

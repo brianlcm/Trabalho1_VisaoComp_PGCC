@@ -1,10 +1,10 @@
 import numpy as np
 
 # Function to calculate homography
-def HomographyGenerator(pairs):
+def HomographyGenerator(pairs, T1, T2):
     
     A = []
-    
+
     # Construct a matrix according to the homography equations
     for x1, y1, x2, y2 in pairs:
         A.append([x1, y1, 1, 0, 0, 0, -x2 * x1, -x2 * y1, -x2])
@@ -18,9 +18,41 @@ def HomographyGenerator(pairs):
     # of (A^T)A with the smalles eigenvalue. Reshape into 3x3 matrix.
     H = np.reshape(V[-1], (3, 3))
 
-    # Normalizes the points
-    H = (1 / H.item(8)) * H
+    H = desnormalizePoints(H, T1, T2)
 
+    # Normalizes the points
+    #H = (1 / H.item(8)) * H
+
+    return H
+
+# Performs normalization of points
+def normalizePoints(pointsMap):
+
+    # Get the size of the set of matches
+    pointsMapSize = len(pointsMap)
+
+    # Calculates the average of the set
+    mean = np.mean(pointsMap, 0)
+
+    # 
+    s = np.linalg.norm((pointsMap-mean), axis=1).sum() / (pointsMapSize * np.sqrt(2))
+
+    # Compute a similarity transformation T, moves original points to
+    # new set of points, such that the new centroid is the origin,
+    # and the average distance from origin is square root of 2
+    T = np.array([[s, 0, mean[0]],
+                  [0, s, mean[1]],
+                  [0, 0, 1]])
+    T = np.linalg.inv(T)
+    pointsMap = np.dot(T, np.concatenate((pointsMap.T, np.ones((1, pointsMap.shape[0])))))
+    pointsMap = pointsMap[0:2].T
+
+    return pointsMap, T
+
+def desnormalizePoints(HNormalized, T1, T2):
+    # Denormalization: denormalize the homography back
+    H = np.dot(np.dot(np.linalg.pinv(T2), HNormalized), T1)
+    H = H/H[-1, -1]
     return H
 
 # Function used to update the value of N in the RANSAC loop
@@ -45,7 +77,7 @@ def dist(pair, H):
     return np.linalg.norm(np.transpose(p2) - p2_estimate)
 
 # Main function that executes RANSAC
-def run_RANSAC(pointsMap):
+def run_RANSAC(pointsMapImg1, pointsMapImg2):
 
     # Defines the parameters of the RANSAC algorithm
     N = 1000 # Number of samplings N
@@ -58,25 +90,33 @@ def run_RANSAC(pointsMap):
     epsilonUpdate = 0.0
 
     print(f'Running RANSAC...')
+
+    TotalPointsMap = np.concatenate([pointsMapImg1,pointsMapImg2], axis=1)
+
+    # Normalizes the points of each image
+    img1Normalized, T1 = normalizePoints(pointsMapImg1)
+    img2Normalized, T2 = normalizePoints(pointsMapImg2)
+
+    TotalPointsMapNorm = np.concatenate([img1Normalized,img2Normalized], axis=1)
     
     # Adaptative RANSAC
-    while (N > counterSamplings):
+    while (counterSamplings < 150):
 
         # Randomly choose 4 matches to estimate the solution
-        pairs = [pointsMap[i] for i in np.random.choice(len(pointsMap), 4)]
+        pairs = [TotalPointsMapNorm[i] for i in np.random.choice(len(TotalPointsMapNorm), 4)]
 
         # Invokes the function to calculate the homography
-        H = HomographyGenerator(pairs)
+        H = HomographyGenerator(pairs, T1, T2)
 
         # Selects inliers according to a distance 'inlierThreshold'
         inliers = {(c[0], c[1], c[2], c[3])
-                   for c in pointsMap if dist(c, H) <= inlierThreshold}
+                   for c in TotalPointsMap if dist(c, H) <= inlierThreshold}
 
         # Minimum number of inliers to be accepted as valid set
-        minInliers = (1-epsilon)*len(pointsMap)
+        minInliers = (1-epsilon)*len(TotalPointsMap)
 
         # Epslon update
-        epsilonUpdate = 1 - (len(inliers)/len(pointsMap))
+        epsilonUpdate = 1 - (len(inliers)/len(TotalPointsMap))
 
         # Checks whether the value of N and epslon should be updated
         if (epsilonUpdate < epsilon):
@@ -91,14 +131,15 @@ def run_RANSAC(pointsMap):
         
         # Update the number of samples
         counterSamplings += 1
-
+        
         # Print results
         print(f'\x1b[2K\r└──> iteration {counterSamplings}/{N}', end='')
         
-        print(f'\nNummber of matches: {len(pointsMap)}')
+        print(f'\nNummber of matches: {len(TotalPointsMap)}')
         print(f'Number of inliers: {len(bestInliers)}')
         print(f'Minimum inliers: {minInliers}')
         
+    
     return homography, bestInliers
 
 

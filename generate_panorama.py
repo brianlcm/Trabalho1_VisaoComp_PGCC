@@ -31,7 +31,7 @@ def fit_transform_homography(homography, img1, img2):
                     warpedImg[y][x] = img1[y][x]
                     continue
 
-                threshold = 50
+                threshold = 100
                 if r_left - r > threshold or g_left - g > threshold or b_left - b > threshold:
                     warpedImg[y][x] = [r, g, b]
                 else:
